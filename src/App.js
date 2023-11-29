@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import "./App.css";
-import addBtn from "./assets/add-30.png";
+import { AuthContextProvider } from "./AuthContext";
 import saved from "./assets/bookmark.svg";
 import rocket from "./assets/rocket.svg";
 import login from "./assets/login.png";
@@ -24,15 +24,18 @@ function App() {
     if (!text.trim()) return;
     const userMessage = { text, isBot: false };
 
-    setMessages(prevMessages => [...prevMessages, userMessage]);
+    setMessages((prevMessages) => [...prevMessages, userMessage]);
 
     try {
       const botResponseText = await sendMsgToOpenAI(text);
       const botResponse = { text: botResponseText, isBot: true };
-      setMessages(prevMessages => [...prevMessages, botResponse]);
+      setMessages((prevMessages) => [...prevMessages, botResponse]);
     } catch (error) {
-      const errorMessage = { text: 'There was an error, AgriBot is not available at the moment. Please try again later.', isBot: true };
-      setMessages(prevMessages => [...prevMessages, errorMessage]);
+      const errorMessage = {
+        text: "There was an error, AgriBot is not available at the moment. Please try again later.",
+        isBot: true,
+      };
+      setMessages((prevMessages) => [...prevMessages, errorMessage]);
     }
   };
 
@@ -46,45 +49,56 @@ function App() {
   };
 
   return (
-    <div className="App">
-      <div className="sideBar">
-        <div className="upperSide">
-          <Logo />
-          <button className="midBtn" onClick={() => window.location.reload()}>
-             New Chat
-          </button>
-          <div className="upperSideBottom">
-            <SidebarQueryButton
-              text="Best farming practices"
-              handleQuery={handleQuery}
+    <AuthContextProvider>
+      <div className="App">
+        <div className="sideBar">
+          <div className="upperSide">
+            <Logo />
+            <button className="midBtn" onClick={() => window.location.reload()}>
+              New Chat
+            </button>
+            <div className="upperSideBottom">
+              <SidebarQueryButton
+                text="Best farming practices"
+                handleQuery={handleQuery}
+              />
+              <SidebarQueryButton
+                text="How to venture into farming"
+                handleQuery={handleQuery}
+              />
+            </div>
+          </div>
+          <div className="lowerSide">
+            <ListItem
+              icon={login}
+              text="Login/Signup"
+              className="login"
+              isAuthItem
             />
-            <SidebarQueryButton
-              text="How to venture into farming"
-              handleQuery={handleQuery}
+            <ListItem icon={saved} text="Saved" className="otherClass" />
+            <ListItem
+              icon={rocket}
+              text="Upgrade To Pro"
+              className="otherClass"
             />
           </div>
         </div>
-        <div className="lowerSide">
-          <ListItem icon={login} text="Login/Signup" className="login" />
-          <ListItem icon={saved} text="Saved" />
-          <ListItem icon={rocket} text="Upgrade To Pro" />
+        <div className="main">
+          <MessageList messages={messages} />
+          <div className="chatFooter">
+            <ChatInput
+              input={input}
+              setInput={setInput}
+              handleSend={handleSend}
+            />
+          </div>
+          <p>
+            AgriBot may give inaccurate or incomplete responses. AgriBot
+            November 2023 Beta version.
+          </p>
         </div>
       </div>
-      <div className="main">
-        <MessageList messages={messages} />
-        <div className="chatFooter">
-          <ChatInput
-            input={input}
-            setInput={setInput}
-            handleSend={handleSend}
-          />
-        </div>
-        <p>
-          AgriBot may give inaccurate or incomplete responses. AgriBot November
-          2023 Beta version.
-        </p>
-      </div>
-    </div>
+    </AuthContextProvider>
   );
 }
 
